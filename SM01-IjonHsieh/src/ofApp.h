@@ -11,4 +11,5 @@ class ofApp : public ofBaseApp{
 
 		ofImage img;
 		ofPixels imgPix;
+		ofPixels newImgPix;
 };

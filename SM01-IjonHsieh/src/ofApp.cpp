@@ -18,13 +18,13 @@ void ofApp::setup()
             }
             else
             {
-                imgPix.setColor(index, ofColor(0));
+                imgPix.setColor(index, ofColor(0)); 
             }
         }
     }
 
     img.setFromPixels(imgPix);
-
+    newImgPix = imgPix;
 
 }
 
@@ -39,21 +39,21 @@ void ofApp::draw()
 {
     img.draw(0, 0);
 
-    ofPixels newImgPix;
-    newImgPix = imgPix;
-
+    unsigned char* data = img.getPixels().getData();
     //for (each cell in image):
-    for (int y = 0; y < ofGetHeight(); y++)
+    for (int y = 1; y < ofGetHeight()-1; y++)
     {
-        for (int x = 0; x < ofGetWidth(); x++)
+        for (int x = 1; x < ofGetWidth()-1; x++)
         {
             //count live neighbors:
             int sum = 0;
-            for (int ny = y - 1; ny <= y + 1; ny++) //count live neighbors:
+            for (int ny = y - 1; ny <= y + 1; ny++)
             {
                 for (int nx = x - 1; nx <= x + 1; nx++) 
                 {
-                    if (imgPix.getColor(nx, ny) == ofColor(255))
+                    int idx = ny * ofGetWidth() + nx;
+                    if (data[idx] == 255)
+                    //if (img.getColor(nx, ny) == ofColor(255))
                     {
                         sum++;
                     }
@@ -61,12 +61,15 @@ void ofApp::draw()
             }
             
             //check cell status:
-            if (imgPix.getColor(x, y) == ofColor(255)) //if (cell is live)
+            int idx = y * ofGetWidth() + x;
+            if (data[idx] == 255)
+            //if (img.getColor(x, y) == ofColor(255)) //if (cell is live)
             {
                 if (sum < 3 || sum > 4) //if (num live neighbors < 2) or if (num live neighbors > 3) :
                 {
                     newImgPix.setColor(x, y, ofColor(0));
                 }
+
 
             }
             else //if (cell is dead)
@@ -75,10 +78,10 @@ void ofApp::draw()
                 {
                     newImgPix.setColor(x, y, ofColor(255));
                 }
+
             }
         }
     }
-    imgPix = newImgPix; //update pixels
     img.setFromPixels(newImgPix);
 }
 
