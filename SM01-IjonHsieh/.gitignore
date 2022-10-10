@@ -92,3 +92,23 @@ Desktop.ini
 
 # InnoSetup
 installer/Output
+
+##################
+# Project Files (optional)
+##################
+
+# Xcode
+*.xcodeproj
+*.xcconfig
+*.plist
+
+# Windows
+*.sln
+*.vcxproj
+*.vcxproj.*
+icon.rc
+
+# Linux
+config.make
+Makefile
+
