@@ -1,0 +1,14 @@
+{
+    "GUI_press_g_toggle": {
+        "Blur_Amount": "14",
+        "Color_Offset": "50",
+        "Color_Target": "170, 50, 42, 255",
+        "Debug_Mode": "0",
+        "Erode_Amount": "4",
+        "Max_Area": "0.11005",
+        "Max_Distance": "50",
+        "Min_Area": "0.0115",
+        "Persistence": "15",
+        "Show_Labels": "0"
+    }
+}
