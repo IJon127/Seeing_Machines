@@ -13,8 +13,13 @@ public:
 
 	ofVideoGrabber grabber;
 
-	ofMesh quadMesh;
+	ofMesh quadMesh; //method 1
+	ofMesh pointMesh; //method 2
+
 	ofParameter<bool> drawWireFrame;
+	ofParameter<bool> usePointMesh;
+	ofParameter<int> skipPoints;
+
 	ofxPanel guiPanel;
 
 };
