@@ -89,7 +89,6 @@ void ofApp::draw()
 		}
 	}
 	grabber.unbind();
-	
 
 	guiPanel.draw();
 
