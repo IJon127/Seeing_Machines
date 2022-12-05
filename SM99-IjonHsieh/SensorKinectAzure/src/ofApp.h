@@ -18,6 +18,8 @@ public:
 
 	void addTriggerPoint(int _id, bool _isLeftHand, ofVec2f _pos, float _h);
 
+	void sendMessage(int _x, int _y);
+
 	//void mouseDragged(int x, int y, int button);
 
 private:

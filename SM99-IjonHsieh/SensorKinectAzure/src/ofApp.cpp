@@ -24,7 +24,6 @@ void ofApp::setup()
 	guiPanel.add(xRight);
 
 	//setup window
-	
 	ofSetWindowShape(circleDiameter, circleDiameter);
 
 	//setup osc sender
@@ -192,6 +191,8 @@ void ofApp::draw()
 
 							ofFill();
 							ofDrawCircle(x, y, 50);
+
+							sendMessage(x, y);
 							//cout << "x: " << currentPoint.getPosition()[0] << "\n" << endl;
 							//cout << "z: " << currentPoint.getPosition()[1] << "\n" << endl;
 						}
@@ -217,7 +218,7 @@ void ofApp::draw()
 	guiPanel.draw();
 }
 
-
+//--------------------------------------------------------------
 void ofApp::addTriggerPoint(int _id, bool _isLeftHand, ofVec2f _pos, float _h)
 {
 	currentPoints.push_back(triggerPoint());
@@ -225,22 +226,12 @@ void ofApp::addTriggerPoint(int _id, bool _isLeftHand, ofVec2f _pos, float _h)
 }
 
 //--------------------------------------------------------------
-/*
-void ofApp::mouseDragged(int x, int y, int button)
+void ofApp::sendMessage(int _x, int _y)
 {
-	if (button == 1)
-	{
-		this->kinectDevice.getBodyTracker().jointSmoothing = ofMap(x, 0, ofGetWidth(), 0.0f, 1.0f, true);
-	}
+	ofxOscMessage msg;
+	msg.setAddress("/position");
+	msg.addIntArg(_x);
+	msg.addIntArg(_y);
+
+	sender.sendMessage(msg);
 }
-*/
-
-
-/*
-ofxOscMessage msg;
-msg.setAddress("/circle/position");
-msg.addIntArg(mouseX);
-msg.addIntArg(mouseY);
-
-sender.sendMessage(msg);
-*/
