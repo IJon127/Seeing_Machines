@@ -54,22 +54,6 @@ void ofApp::setup()
 		this->kinectDevice.startBodyTracker(bodyTrackerSettings);
 	}
 
-	// Load shader.
-	/*
-	auto shaderSettings = ofShaderSettings();
-	shaderSettings.shaderFiles[GL_VERTEX_SHADER] = "shaders/render.vert";
-	shaderSettings.shaderFiles[GL_FRAGMENT_SHADER] = "shaders/render.frag";
-	shaderSettings.intDefines["BODY_INDEX_MAP_BACKGROUND"] = K4ABT_BODY_INDEX_MAP_BACKGROUND;
-	shaderSettings.bindDefaults = true;
-	if (this->shader.setup(shaderSettings))
-	{
-		ofLogNotice(__FUNCTION__) << "Success loading shader!";
-	}
-	*/
-
-	// Setup vbo.
-	//std::vector<glm::vec3> verts(1);
-	//this->pointsVbo.setVertexData(verts.data(), verts.size(), GL_STATIC_DRAW);
 
 	//initial triggerPoints
 	addTriggerPoint(0, true, ofVec2f(0, 0), 0);
@@ -107,38 +91,6 @@ void ofApp::draw()
 	{
 		//ofPushMatrix();
 		{
-			//ofRotateXDeg(180);
-
-			/*
-			ofEnableDepthTest();
-			constexpr int kMaxBodies = 10;
-			int bodyIDs[kMaxBodies];
-			int i = 0;
-			while (i < this->kinectDevice.getNumBodies())
-			{
-				bodyIDs[i] = this->kinectDevice.getBodyIDs()[i];
-				++i;
-			}
-			while (i < kMaxBodies)
-			{
-				bodyIDs[i] = 0;
-				++i;
-			}
-			
-			this->shader.begin();
-			{
-				this->shader.setUniformTexture("uDepthTex", this->kinectDevice.getDepthTex(), 1);
-				this->shader.setUniformTexture("uBodyIndexTex", this->kinectDevice.getBodyIndexTex(), 2);
-				this->shader.setUniformTexture("uWorldTex", this->kinectDevice.getDepthToWorldTex(), 3);
-				this->shader.setUniform2i("uFrameSize", this->kinectDevice.getDepthTex().getWidth(), this->kinectDevice.getDepthTex().getHeight());
-				this->shader.setUniform1iv("uBodyIDs", bodyIDs, kMaxBodies);
-
-				int numPoints = this->kinectDevice.getDepthTex().getWidth() * this->kinectDevice.getDepthTex().getHeight();
-				this->pointsVbo.drawInstanced(GL_POINTS, 0, 1, numPoints);
-			}
-			this->shader.end();
-			ofDisableDepthTest();
-			*/
 
 
 			currentPoints.clear();
@@ -208,12 +160,6 @@ void ofApp::draw()
 	}
 	//this->camera.end();
 
-	/*
-	std::ostringstream oss;
-	oss << ofToString(ofGetFrameRate(), 2) + " FPS" << std::endl;
-	oss << "Joint Smoothing: " << this->kinectDevice.getBodyTracker().jointSmoothing << std::endl;
-	ofDrawBitmapStringHighlight(oss.str(), 10, 20);
-	*/
 
 	guiPanel.draw();
 }
