@@ -4,9 +4,9 @@
 void ofApp::setup()
 {
 	//setup the parameters
-	handThreshole.set("Hand and Neck Distance", 200, 100, 500);
-	//sensorDist.set("Sensor and Circle Distance", 1100, 800, 1800);
-	//circleRadius.set("Circle Radius", 1100, 900, 1100);
+	raisingHandThreshole.set("Raising Hand Threshole", 200, 100, 500);
+	posChangeThreshole.set("Position Change Threshole", 50, 10, 100);
+	heightChangeThreshole.set("Height Change Threshole", 50, 10, 100);
 	zFront.set("Z front point", 1300, 800, 1800);
 	zBack.set("Z back point", 3500, 3000, 4000);
 	xLeft.set("X Left point", 1100, 800, 1400);
@@ -14,10 +14,10 @@ void ofApp::setup()
 
 
 	//setup the gui
-	guiPanel.setup("Gui");
-	guiPanel.add(handThreshole);
-	//guiPanel.add(sensorDist);
-	//guiPanel.add(circleRadius);
+	guiPanel.setup("Gui", "settings.json");
+	guiPanel.add(raisingHandThreshole);
+	guiPanel.add(posChangeThreshole);
+	guiPanel.add(heightChangeThreshole);
 	guiPanel.add(zFront);
 	guiPanel.add(zBack);
 	guiPanel.add(xLeft);
@@ -52,6 +52,7 @@ void ofApp::setup()
 	}
 
 	// Load shader.
+	/*
 	auto shaderSettings = ofShaderSettings();
 	shaderSettings.shaderFiles[GL_VERTEX_SHADER] = "shaders/render.vert";
 	shaderSettings.shaderFiles[GL_FRAGMENT_SHADER] = "shaders/render.frag";
@@ -61,10 +62,11 @@ void ofApp::setup()
 	{
 		ofLogNotice(__FUNCTION__) << "Success loading shader!";
 	}
+	*/
 
 	// Setup vbo.
-	std::vector<glm::vec3> verts(1);
-	this->pointsVbo.setVertexData(verts.data(), verts.size(), GL_STATIC_DRAW);
+	//std::vector<glm::vec3> verts(1);
+	//this->pointsVbo.setVertexData(verts.data(), verts.size(), GL_STATIC_DRAW);
 
 	//initial triggerPoints
 	addTriggerPoint(0, true, ofVec2f(0, 0), 0);
@@ -152,18 +154,14 @@ void ofApp::draw()
 				ofVec2f rightPos = glm::vec2(rightHandX, rightHandZ);
 
 				//check raising hands
-				if (neckY - leftHandY > handThreshole)
+				if (neckY - leftHandY > raisingHandThreshole)
 				{
 					addTriggerPoint(bodyId, true, leftPos, leftHandY);
-					//cout << "x: " << leftHandX << "\n" << endl;
-					//cout << "z: " << leftHandZ << "\n" << endl;
 				}
 
-				if (neckY - rightHandY > handThreshole)
+				if (neckY - rightHandY > raisingHandThreshole)
 				{
 					addTriggerPoint(bodyId, false, rightPos, rightHandY);
-					//cout << "x: " << rightHandX << "\n" << endl;
-					//cout << "z: " << rightHandZ << "\n" << endl;
 				}
 			}
 
@@ -178,8 +176,8 @@ void ofApp::draw()
 						float distance = currentPoint.getPosition().distance(lastPoint.getPosition());
 						float heightChangeAmount = abs(currentPoint.getHeight()-lastPoint.getHeight());
 						//cout << distance << "\n" << endl;
-						//cout << heightChangeAmount << "\n" << endl;
-						if (distance > 100 || heightChangeAmount > 100)
+						cout << heightChangeAmount << "\n" << endl;
+						if (distance > posChangeThreshole || heightChangeAmount > heightChangeThreshole)
 						{
 							
 							//cout << "x: " << currentPoint.getPosition()[0] << "\n" << endl;
@@ -197,10 +195,12 @@ void ofApp::draw()
 	}
 	//this->camera.end();
 
+	/*
 	std::ostringstream oss;
 	oss << ofToString(ofGetFrameRate(), 2) + " FPS" << std::endl;
 	oss << "Joint Smoothing: " << this->kinectDevice.getBodyTracker().jointSmoothing << std::endl;
 	ofDrawBitmapStringHighlight(oss.str(), 10, 20);
+	*/
 
 	guiPanel.draw();
 }

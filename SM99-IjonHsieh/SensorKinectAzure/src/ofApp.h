@@ -23,17 +23,17 @@ public:
 private:
 	ofxAzureKinect::Device kinectDevice;
 
-	ofEasyCam camera;
+	//ofEasyCam camera;
 
-	ofVbo pointsVbo;
-	ofShader shader;
+	//ofVbo pointsVbo;
+	//ofShader shader;
 
-	ofVboMesh skeletonMesh;
+	//ofVboMesh skeletonMesh;
 
 
-	ofParameter<int> handThreshole; //distance between the hands and the neck
-	//ofParameter<int> sensorDist; //distance from the sensor to the edge of the circle
-	//ofParameter<int> circleRadius;
+	ofParameter<int> raisingHandThreshole; //distance between the hands and the neck
+	ofParameter<int> posChangeThreshole;
+	ofParameter<int> heightChangeThreshole;
 
 	ofxPanel guiPanel;
 
