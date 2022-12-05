@@ -23,6 +23,10 @@ void ofApp::setup()
 	guiPanel.add(xLeft);
 	guiPanel.add(xRight);
 
+	//setup window
+	
+	ofSetWindowShape(circleDiameter, circleDiameter);
+
 	//setup osc sender
 	sendAddress = "localhost";
 	sendPort = 3030;
@@ -90,6 +94,10 @@ void ofApp::update()
 void ofApp::draw()
 {
 	ofBackground(0);
+
+	ofSetColor(255);
+	ofNoFill();
+	ofDrawCircle(circleDiameter/2, circleDiameter/2, circleDiameter/2);
 
 	if (this->kinectDevice.isStreaming())
 	{
@@ -176,10 +184,14 @@ void ofApp::draw()
 						float distance = currentPoint.getPosition().distance(lastPoint.getPosition());
 						float heightChangeAmount = abs(currentPoint.getHeight()-lastPoint.getHeight());
 						//cout << distance << "\n" << endl;
-						cout << heightChangeAmount << "\n" << endl;
+						//cout << heightChangeAmount << "\n" << endl;
 						if (distance > posChangeThreshole || heightChangeAmount > heightChangeThreshole)
 						{
-							
+							int x = (int)ofMap(currentPoint.getPosition()[0], xLeft, xRight, 0, circleDiameter);
+							int y = (int)ofMap(currentPoint.getPosition()[1], zBack, zFront, 0, circleDiameter);
+
+							ofFill();
+							ofDrawCircle(x, y, 50);
 							//cout << "x: " << currentPoint.getPosition()[0] << "\n" << endl;
 							//cout << "z: " << currentPoint.getPosition()[1] << "\n" << endl;
 						}

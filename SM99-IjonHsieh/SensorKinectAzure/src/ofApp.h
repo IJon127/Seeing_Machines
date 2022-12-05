@@ -30,23 +30,26 @@ private:
 
 	//ofVboMesh skeletonMesh;
 
+	const int circleDiameter = 1200;
 
+	//parameters
 	ofParameter<int> raisingHandThreshole; //distance between the hands and the neck
 	ofParameter<int> posChangeThreshole;
 	ofParameter<int> heightChangeThreshole;
-
-	ofxPanel guiPanel;
 
 	ofParameter<float> zFront;
 	ofParameter<float> zBack;
 	ofParameter<float> xLeft;
 	ofParameter<float> xRight;
 
+	ofxPanel guiPanel;
+
 	//osc
 	string sendAddress;
 	int sendPort;
 
 	ofxOscSender sender;
+
 
 	//trigger point
 	vector<triggerPoint> currentPoints;
