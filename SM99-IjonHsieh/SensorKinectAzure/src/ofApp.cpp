@@ -5,8 +5,8 @@ void ofApp::setup()
 {
 	//setup the parameters
 	handThreshole.set("Hand and Neck Distance", 200, 100, 500);
-	sensorDist.set("Sensor and Circle Distance", 1100, 800, 1800);
-	circleRadius.set("Circle Radius", 1100, 900, 1100);
+	//sensorDist.set("Sensor and Circle Distance", 1100, 800, 1800);
+	//circleRadius.set("Circle Radius", 1100, 900, 1100);
 	zFront.set("Z front point", 1300, 800, 1800);
 	zBack.set("Z back point", 3500, 3000, 4000);
 	xLeft.set("X Left point", 1100, 800, 1400);
@@ -16,8 +16,8 @@ void ofApp::setup()
 	//setup the gui
 	guiPanel.setup("Gui");
 	guiPanel.add(handThreshole);
-	guiPanel.add(sensorDist);
-	guiPanel.add(circleRadius);
+	//guiPanel.add(sensorDist);
+	//guiPanel.add(circleRadius);
 	guiPanel.add(zFront);
 	guiPanel.add(zBack);
 	guiPanel.add(xLeft);
@@ -65,6 +65,10 @@ void ofApp::setup()
 	// Setup vbo.
 	std::vector<glm::vec3> verts(1);
 	this->pointsVbo.setVertexData(verts.data(), verts.size(), GL_STATIC_DRAW);
+
+	//initial triggerPoints
+	addTriggerPoint(0, true, ofVec2f(0, 0), 0);
+	lastPoints = currentPoints;
 }
 
 
@@ -90,11 +94,11 @@ void ofApp::draw()
 		this->kinectDevice.getBodyIndexTex().draw(0, 0, 360, 360);
 	}
 
-	this->camera.begin();
+	//this->camera.begin();
 	{
-		ofPushMatrix();
+		//ofPushMatrix();
 		{
-			ofRotateXDeg(180);
+			//ofRotateXDeg(180);
 
 			/*
 			ofEnableDepthTest();
@@ -127,146 +131,71 @@ void ofApp::draw()
 			ofDisableDepthTest();
 			*/
 
+
+			currentPoints.clear();
+
 			auto& bodySkeletons = this->kinectDevice.getBodySkeletons();
-			for (size_t e = 0; e < bodySkeletons.size(); e++)
-			{
+			for (size_t i = 0; i < bodySkeletons.size(); i++)
+			{				
+				int bodyId = this->kinectDevice.getBodyIDs()[i];
+				float neckY = bodySkeletons[i].joints[K4ABT_JOINT_NECK].position.v[1];
+				float leftHandY = bodySkeletons[i].joints[K4ABT_JOINT_WRIST_LEFT].position.v[1];
+				float rightHandY = bodySkeletons[i].joints[K4ABT_JOINT_WRIST_RIGHT].position.v[1];
 
-				int bodyId = this->kinectDevice.getBodyIDs()[e];
+				float leftHandX = bodySkeletons[i].joints[K4ABT_JOINT_WRIST_LEFT].position.v[0];
+				float leftHandZ = bodySkeletons[i].joints[K4ABT_JOINT_WRIST_LEFT].position.v[2];
+				float rightHandX = bodySkeletons[i].joints[K4ABT_JOINT_WRIST_RIGHT].position.v[0];
+				float rightHandZ = bodySkeletons[i].joints[K4ABT_JOINT_WRIST_RIGHT].position.v[2];
 
-				float neckHeight = bodySkeletons[e].joints[K4ABT_JOINT_NECK].position.v[1];
-				float leftHeight = bodySkeletons[e].joints[K4ABT_JOINT_WRIST_LEFT].position.v[1];
-				float rightHeight = bodySkeletons[e].joints[K4ABT_JOINT_WRIST_RIGHT].position.v[1];
 
+				ofVec2f leftPos = glm::vec2(leftHandX, leftHandZ);
+				ofVec2f rightPos = glm::vec2(rightHandX, rightHandZ);
 
-				if (neckHeight - leftHeight > handThreshole)
+				//check raising hands
+				if (neckY - leftHandY > handThreshole)
 				{
-					cout << bodyId << " : Left" << "\n" << endl;
-					cout << "x: " << bodySkeletons[e].joints[K4ABT_JOINT_WRIST_LEFT].position.v[0] << "\n" << endl;
-					cout << "z: " << bodySkeletons[e].joints[K4ABT_JOINT_WRIST_LEFT].position.v[2] << "\n" << endl;
-
+					addTriggerPoint(bodyId, true, leftPos, leftHandY);
+					//cout << "x: " << leftHandX << "\n" << endl;
+					//cout << "z: " << leftHandZ << "\n" << endl;
 				}
 
-				if (neckHeight - rightHeight > handThreshole)
+				if (neckY - rightHandY > handThreshole)
 				{
-					cout << bodyId << " : Right" << "\n" << endl;
-					cout << "x: " << bodySkeletons[e].joints[K4ABT_JOINT_WRIST_RIGHT].position.v[0] << "\n" << endl;
-					cout << "z: " << bodySkeletons[e].joints[K4ABT_JOINT_WRIST_RIGHT].position.v[2] << "\n" << endl;
+					addTriggerPoint(bodyId, false, rightPos, rightHandY);
+					//cout << "x: " << rightHandX << "\n" << endl;
+					//cout << "z: " << rightHandZ << "\n" << endl;
 				}
-				
-				
-				/*
-				// Draw joints.
-				for (int i = 0; i < K4ABT_JOINT_COUNT; ++i)
-				{
-					auto joint = skeleton.joints[i];
-					ofPushMatrix();
-					{
-						glm::mat4 transform = glm::translate(toGlm(joint.position)) * glm::toMat4(toGlm(joint.orientation));
-						ofMultMatrix(transform);
-
-						ofDrawAxis(50.0f);
-					}
-					ofPopMatrix();
-				}
-				
-
-				// Draw connections.
-				this->skeletonMesh.setMode(OF_PRIMITIVE_LINES);
-				auto& vertices = this->skeletonMesh.getVertices();
-				vertices.resize(50);
-				int vdx = 0;
-
-				
-				// Spine.
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_PELVIS].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_SPINE_NAVEL].position);
-
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_SPINE_NAVEL].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_SPINE_CHEST].position);
-
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_SPINE_CHEST].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_NECK].position);
-
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_NECK].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_HEAD].position);
-
-				// Head.
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_HEAD].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_NOSE].position);
-
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_NOSE].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_EYE_LEFT].position);
-
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_EYE_LEFT].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_EAR_LEFT].position);
-
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_NOSE].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_EYE_RIGHT].position);
-
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_EYE_RIGHT].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_EAR_RIGHT].position);
-
-				// Left Leg.
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_PELVIS].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_HIP_LEFT].position);
-
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_HIP_LEFT].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_KNEE_LEFT].position);
-
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_KNEE_LEFT].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_ANKLE_LEFT].position);
-
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_ANKLE_LEFT].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_FOOT_LEFT].position);
-
-				// Right leg.
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_PELVIS].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_HIP_RIGHT].position);
-
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_HIP_RIGHT].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_KNEE_RIGHT].position);
-
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_KNEE_RIGHT].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_ANKLE_RIGHT].position);
-
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_ANKLE_RIGHT].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_FOOT_RIGHT].position);
-
-				// Left arm.
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_NECK].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_CLAVICLE_LEFT].position);
-
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_CLAVICLE_LEFT].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_SHOULDER_LEFT].position);
-
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_SHOULDER_LEFT].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_ELBOW_LEFT].position);
-
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_ELBOW_LEFT].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_WRIST_LEFT].position);
-
-				// Right arm.
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_NECK].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_CLAVICLE_RIGHT].position);
-
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_CLAVICLE_RIGHT].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_SHOULDER_RIGHT].position);
-
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_SHOULDER_RIGHT].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_ELBOW_RIGHT].position);
-
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_ELBOW_RIGHT].position);
-				vertices[vdx++] = toGlm(skeleton.joints[K4ABT_JOINT_WRIST_RIGHT].position);
-				
-
-				
-				this->skeletonMesh.draw();
-				*/
 			}
+
+			//debouncing 
+			
+			for (auto& currentPoint : currentPoints)
+			{
+				for (auto& lastPoint : lastPoints)
+				{
+					if (currentPoint.getId() == lastPoint.getId() && currentPoint.checkIsLeftHand() == lastPoint.checkIsLeftHand())
+					{
+						float distance = currentPoint.getPosition().distance(lastPoint.getPosition());
+						float heightChangeAmount = abs(currentPoint.getHeight()-lastPoint.getHeight());
+						//cout << distance << "\n" << endl;
+						//cout << heightChangeAmount << "\n" << endl;
+						if (distance > 100 || heightChangeAmount > 100)
+						{
+							
+							//cout << "x: " << currentPoint.getPosition()[0] << "\n" << endl;
+							//cout << "z: " << currentPoint.getPosition()[1] << "\n" << endl;
+						}
+					}
+				}
+			}
+
+			lastPoints.clear();
+			lastPoints = currentPoints;
+
 		}
-		ofPopMatrix();
+		//ofPopMatrix();
 	}
-	this->camera.end();
+	//this->camera.end();
 
 	std::ostringstream oss;
 	oss << ofToString(ofGetFrameRate(), 2) + " FPS" << std::endl;
@@ -277,7 +206,11 @@ void ofApp::draw()
 }
 
 
-
+void ofApp::addTriggerPoint(int _id, bool _isLeftHand, ofVec2f _pos, float _h)
+{
+	currentPoints.push_back(triggerPoint());
+	currentPoints.back().setup(_id, _isLeftHand, _pos , _h);
+}
 
 //--------------------------------------------------------------
 /*

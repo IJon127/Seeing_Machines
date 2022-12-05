@@ -4,6 +4,7 @@
 #include "ofxAzureKinect.h"
 #include "ofxGui.h"
 #include "ofxOsc.h"
+#include "triggerPoint.h"
 
 
 class ofApp : public ofBaseApp
@@ -14,6 +15,8 @@ public:
 	void exit();
 	void update();
 	void draw();
+
+	void addTriggerPoint(int _id, bool _isLeftHand, ofVec2f _pos, float _h);
 
 	//void mouseDragged(int x, int y, int button);
 
@@ -29,8 +32,8 @@ private:
 
 
 	ofParameter<int> handThreshole; //distance between the hands and the neck
-	ofParameter<int> sensorDist; //distance from the sensor to the edge of the circle
-	ofParameter<int> circleRadius;
+	//ofParameter<int> sensorDist; //distance from the sensor to the edge of the circle
+	//ofParameter<int> circleRadius;
 
 	ofxPanel guiPanel;
 
@@ -45,9 +48,8 @@ private:
 
 	ofxOscSender sender;
 
-	
-
-	int r;
-	
+	//trigger point
+	vector<triggerPoint> currentPoints;
+	vector<triggerPoint> lastPoints;
 
 };
