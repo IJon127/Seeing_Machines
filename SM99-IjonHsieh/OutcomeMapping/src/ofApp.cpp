@@ -33,6 +33,18 @@ void ofApp::setup() {
     renderFbo.allocate(PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y);
     warpedImg.allocate(PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y, OF_IMAGE_COLOR);
 
+    // Draw the circular mask
+    circularMask.allocate(PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y);
+    circularMask.begin();
+    {
+        ofClear(0.f, 0.f);
+        ofDrawCircle(PROJECTOR_RESOLUTION_X / 2, PROJECTOR_RESOLUTION_Y / 2, circleDiameter / 2);
+    }
+    circularMask.end();
+
+    ofTexture& maskTexture = circularMask.getTexture();
+    renderFbo.getTexture().setAlphaMask(maskTexture);
+
     srcPoints.push_back(glm::vec2(0, 0));
     srcPoints.push_back(glm::vec2(1, 0));
     srcPoints.push_back(glm::vec2(0, 1));
@@ -265,29 +277,5 @@ void ofApp::mouseReleased(int x, int y, int button) {
     }
 }
 
-//--------------------------------------------------------------
-//void ofApp::mouseEntered(int x, int y){
-//
-//}
-//
-////--------------------------------------------------------------
-//void ofApp::mouseExited(int x, int y){
-//
-//}
-//
-////--------------------------------------------------------------
-//void ofApp::windowResized(int w, int h){
-//
-//}
-//
-////--------------------------------------------------------------
-//void ofApp::gotMessage(ofMessage msg){
-//
-//}
-//
-////--------------------------------------------------------------
-//void ofApp::dragEvent(ofDragInfo dragInfo){
-//
-//}
 
 // underwaterSunlight: https://www.youtube.com/watch?v=eog-W_udzvA&ab_channel=NATUREVIBE%E2%80%99S

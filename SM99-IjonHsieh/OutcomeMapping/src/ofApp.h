@@ -72,6 +72,7 @@ private:
     ofFbo renderFbo;
     ofPixels renderPixels;
     ofImage warpedImg;
+    ofFbo circularMask;
 
     std::vector<glm::vec2> srcPoints;
     std::vector<glm::vec2> dstPoints;
