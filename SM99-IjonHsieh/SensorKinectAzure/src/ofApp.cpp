@@ -88,74 +88,72 @@ void ofApp::draw()
 	}
 
 
-		//ofPushMatrix();
+	//ofPushMatrix();
+	{
+
+
+		currentPoints.clear();
+
+		auto& bodySkeletons = this->kinectDevice.getBodySkeletons();
+		for (size_t i = 0; i < bodySkeletons.size(); i++)
 		{
+			int bodyId = this->kinectDevice.getBodyIDs()[i];
+			float neckY = bodySkeletons[i].joints[K4ABT_JOINT_NECK].position.v[1];
+			float leftHandY = bodySkeletons[i].joints[K4ABT_JOINT_WRIST_LEFT].position.v[1];
+			float rightHandY = bodySkeletons[i].joints[K4ABT_JOINT_WRIST_RIGHT].position.v[1];
+
+			float leftHandX = bodySkeletons[i].joints[K4ABT_JOINT_WRIST_LEFT].position.v[0];
+			float leftHandZ = bodySkeletons[i].joints[K4ABT_JOINT_WRIST_LEFT].position.v[2];
+			float rightHandX = bodySkeletons[i].joints[K4ABT_JOINT_WRIST_RIGHT].position.v[0];
+			float rightHandZ = bodySkeletons[i].joints[K4ABT_JOINT_WRIST_RIGHT].position.v[2];
 
 
-			currentPoints.clear();
+			ofVec2f leftPos = glm::vec2(leftHandX, leftHandZ);
+			ofVec2f rightPos = glm::vec2(rightHandX, rightHandZ);
 
-			auto& bodySkeletons = this->kinectDevice.getBodySkeletons();
-			for (size_t i = 0; i < bodySkeletons.size(); i++)
-			{				
-				int bodyId = this->kinectDevice.getBodyIDs()[i];
-				float neckY = bodySkeletons[i].joints[K4ABT_JOINT_NECK].position.v[1];
-				float leftHandY = bodySkeletons[i].joints[K4ABT_JOINT_WRIST_LEFT].position.v[1];
-				float rightHandY = bodySkeletons[i].joints[K4ABT_JOINT_WRIST_RIGHT].position.v[1];
-
-				float leftHandX = bodySkeletons[i].joints[K4ABT_JOINT_WRIST_LEFT].position.v[0];
-				float leftHandZ = bodySkeletons[i].joints[K4ABT_JOINT_WRIST_LEFT].position.v[2];
-				float rightHandX = bodySkeletons[i].joints[K4ABT_JOINT_WRIST_RIGHT].position.v[0];
-				float rightHandZ = bodySkeletons[i].joints[K4ABT_JOINT_WRIST_RIGHT].position.v[2];
-
-
-				ofVec2f leftPos = glm::vec2(leftHandX, leftHandZ);
-				ofVec2f rightPos = glm::vec2(rightHandX, rightHandZ);
-
-				//check raising hands
-				if (neckY - leftHandY > raisingHandThreshole)
-				{
-					addTriggerPoint(bodyId, true, leftPos, leftHandY);
-				}
-
-				if (neckY - rightHandY > raisingHandThreshole)
-				{
-					addTriggerPoint(bodyId, false, rightPos, rightHandY);
-				}
+			//check raising hands
+			if (neckY - leftHandY > raisingHandThreshole)
+			{
+				addTriggerPoint(bodyId, true, leftPos, leftHandY);
 			}
 
-			//debouncing 
-			
-			for (auto& currentPoint : currentPoints)
+			if (neckY - rightHandY > raisingHandThreshole)
 			{
-				for (auto& lastPoint : lastPoints)
+				addTriggerPoint(bodyId, false, rightPos, rightHandY);
+			}
+		}
+
+		//debouncing 
+
+		for (auto& currentPoint : currentPoints)
+		{
+			for (auto& lastPoint : lastPoints)
+			{
+				if (currentPoint.getId() == lastPoint.getId() && currentPoint.checkIsLeftHand() == lastPoint.checkIsLeftHand())
 				{
-					if (currentPoint.getId() == lastPoint.getId() && currentPoint.checkIsLeftHand() == lastPoint.checkIsLeftHand())
+					float distance = currentPoint.getPosition().distance(lastPoint.getPosition());
+					float heightChangeAmount = abs(currentPoint.getHeight() - lastPoint.getHeight());
+
+					if (distance > posChangeThreshole || heightChangeAmount > heightChangeThreshole)
 					{
-						float distance = currentPoint.getPosition().distance(lastPoint.getPosition());
-						float heightChangeAmount = abs(currentPoint.getHeight()-lastPoint.getHeight());
-						//cout << distance << "\n" << endl;
-						//cout << heightChangeAmount << "\n" << endl;
-						if (distance > posChangeThreshole || heightChangeAmount > heightChangeThreshole)
-						{
-							int x = (int)ofMap(currentPoint.getPosition()[0], xLeft, xRight, 0, circleDiameter);
-							int y = (int)ofMap(currentPoint.getPosition()[1], zBack, zFront, 0, circleDiameter);
+						int x = (int)ofMap(currentPoint.getPosition()[0], xLeft, xRight, 0, circleDiameter);
+						int y = (int)ofMap(currentPoint.getPosition()[1], zBack, zFront, 0, circleDiameter);
 
-							ofFill();
-							ofDrawCircle(x, y, 50);
+						ofFill();
+						ofDrawCircle(x, y, 50);
 
-							sendMessage(x, y);
-							//cout << "x: " << currentPoint.getPosition()[0] << "\n" << endl;
-							//cout << "z: " << currentPoint.getPosition()[1] << "\n" << endl;
-						}
+						sendMessage(x, y);
+
 					}
 				}
 			}
-
-			lastPoints.clear();
-			lastPoints = currentPoints;
-
 		}
-		//ofPopMatrix();
+
+		lastPoints.clear();
+		lastPoints = currentPoints;
+
+	}
+	//ofPopMatrix();
 
 
 
