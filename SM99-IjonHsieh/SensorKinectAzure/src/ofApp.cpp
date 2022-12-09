@@ -27,7 +27,7 @@ void ofApp::setup()
 	ofSetWindowShape(circleDiameter, circleDiameter);
 
 	//setup osc sender
-	sendAddress = "10.23.11.7";
+	sendAddress = "localhost";
 	sendPort = 3030;
 	sender.setup(sendAddress, sendPort);
 	
@@ -87,8 +87,7 @@ void ofApp::draw()
 		this->kinectDevice.getBodyIndexTex().draw(0, 0, 360, 360);
 	}
 
-	//this->camera.begin();
-	{
+
 		//ofPushMatrix();
 		{
 
@@ -157,8 +156,7 @@ void ofApp::draw()
 
 		}
 		//ofPopMatrix();
-	}
-	//this->camera.end();
+
 
 
 	guiPanel.draw();
