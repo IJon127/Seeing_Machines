@@ -27,7 +27,7 @@ void ofApp::setup()
 	ofSetWindowShape(circleDiameter, circleDiameter);
 
 	//setup osc sender
-	sendAddress = "localhost";
+	sendAddress = "10.23.11.7";
 	sendPort = 3030;
 	sender.setup(sendAddress, sendPort);
 	

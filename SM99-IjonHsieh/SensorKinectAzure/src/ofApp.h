@@ -20,17 +20,10 @@ public:
 
 	void sendMessage(int _x, int _y);
 
-	//void mouseDragged(int x, int y, int button);
 
 private:
 	ofxAzureKinect::Device kinectDevice;
 
-	//ofEasyCam camera;
-
-	//ofVbo pointsVbo;
-	//ofShader shader;
-
-	//ofVboMesh skeletonMesh;
 
 	const int circleDiameter = 1200;
 
