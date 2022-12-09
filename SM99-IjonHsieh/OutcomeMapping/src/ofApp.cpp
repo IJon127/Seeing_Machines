@@ -33,17 +33,21 @@ void ofApp::setup() {
     renderFbo.allocate(PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y);
     warpedImg.allocate(PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y, OF_IMAGE_COLOR);
 
+    /*
     // Draw the circular mask
-    circularMask.allocate(PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y);
-    circularMask.begin();
+    maskFbo.allocate(PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y);
+    maskFbo.begin();
     {
         ofClear(0.f, 0.f);
         ofDrawCircle(PROJECTOR_RESOLUTION_X / 2, PROJECTOR_RESOLUTION_Y / 2, circleDiameter / 2);
     }
-    circularMask.end();
+    maskFbo.end();
 
-    ofTexture& maskTexture = circularMask.getTexture();
+    ofTexture& maskTexture = maskFbo.getTexture();
     renderFbo.getTexture().setAlphaMask(maskTexture);
+    */
+
+
 
     srcPoints.push_back(glm::vec2(0, 0));
     srcPoints.push_back(glm::vec2(1, 0));
@@ -146,9 +150,27 @@ void ofApp::update() {
         renderFbo.readToPixels(renderPixels);
 
         // Warp the pixels into a new image.
-        warpedImg.setFromPixels(renderPixels);
-        ofxCv::warpPerspective(renderPixels, warpedImg, homographyMat, CV_INTER_LINEAR);
+        cv::Mat renderMat = ofxCv::toCv(renderPixels);
+
+        cv::Mat circularMask(renderMat.size(), renderMat.type());
+        cv::Point center(renderMat.cols / 2, renderMat.rows / 2);
+        const int radius = renderMat.rows / 2; // Circle radio
+        cv::circle(circularMask, center, radius, 255, cv::FILLED);// Draw a circle in the image center
+
+        cv::Mat warpedMat(renderMat.size(), renderMat.type());
+        warpedMat.setTo(0); // Clear data
+        renderMat.copyTo(warpedMat, circularMask); // Only values at mask > 0 will be copied.
+
+
+
+        // Convert the result CV image back to OF space.
+        //ofxCv::toOf(warpedMat, warpedImg); 
+        //ofxCv::warpPerspective(renderPixels, warpedImg, homographyMat, CV_INTER_LINEAR);
+        ofxCv::warpPerspective(warpedMat, warpedImg, homographyMat, CV_INTER_LINEAR);
+
         warpedImg.update();
+
+
     }
 
 
