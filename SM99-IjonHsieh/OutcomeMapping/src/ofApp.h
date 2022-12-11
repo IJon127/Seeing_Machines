@@ -17,16 +17,20 @@ public:
     }
 
     void update() {
-        radius += 0.1;
+        radius += 0.02;
     }
 
     void draw() {
         for (int i = 0; i < 20; i++) {
-            float alpha = ofMap(radius, 1, 20, 40, 0);
-            ofNoFill();
-            ofSetColor(255, 255, 255, alpha);
-            ofDrawCircle(pos.x, pos.y, radius * i);
+            ofEnableAlphaBlending();
 
+            float alpha = ofMap(radius * i, 1, 150, 40, 0);
+            float lineWeight = ofMap(radius * i, 1, 100, 1, 12);
+            ofSetLineWidth(lineWeight);
+            ofNoFill();
+            ofSetColor(180,220,255, alpha);
+            ofDrawCircle(pos.x, pos.y, radius * i);
+            ofDisableAlphaBlending();
         }
     }
 
@@ -74,8 +78,8 @@ private:
     
     ofImage warpedImg;
 
-    //ofFbo maskFbo;
-    //ofPixels maskPixels;
+    ofFbo maskFbo;
+    ofPixels maskPixels;
 
 
     std::vector<glm::vec2> srcPoints;
@@ -88,6 +92,23 @@ private:
 
     ofParameter<bool> adjustMapping;
     ofParameter<bool> projectWarped;
+   
+    /* 
+    //can't be save in settings.json
+    ofParameterGroup cornersGroup;
+    ofParameter<glm::vec2> corners[4];
+    */
+
+    
+    ofParameter<float> topLeftX;
+    ofParameter<float> topRightX;
+    ofParameter<float> bottomLeftX;
+    ofParameter<float> bottomRightX;
+    ofParameter<float> topLeftY;
+    ofParameter<float> topRightY;
+    ofParameter<float> bottomLeftY;
+    ofParameter<float> bottomRightY;
+
 
     ofxPanel guiPanel;
 

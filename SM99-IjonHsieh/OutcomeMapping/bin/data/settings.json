@@ -1,0 +1,14 @@
+{
+    "Homography": {
+        "Adjust_Mapping": "0",
+        "Bottom_Left_X": "-0.403125",
+        "Bottom_Left_Y": "0.822222",
+        "Bottom_Right_X": "1.31406",
+        "Bottom_Right_Y": "0.947222",
+        "Project_Warped": "1",
+        "Top_Left_X": "0.103125",
+        "Top_Left_Y": "0.116667",
+        "Top_Right_X": "0.803125",
+        "Top_Right_Y": "0.155556"
+    }
+}

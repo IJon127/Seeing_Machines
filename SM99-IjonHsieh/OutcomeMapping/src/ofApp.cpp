@@ -1,7 +1,7 @@
 #include "ofApp.h"
 
 bool shouldRemove(Circles& c) {
-    if (c.radius > 20) return true;
+    if (c.radius > 15) return true;
     else return false;
 }
 
@@ -18,13 +18,12 @@ void ofApp::setup() {
     //CODE FROM TUAN
     {
         //set up video
-        waterMovie.load("underwaterSunlight.mp4");
+        waterMovie.load("cloud-sky.mp4");
         waterMovie.setSpeed(1);
         waterMovie.play();
         ofSetBackgroundColor(0, 0, 255);
-
-        ofSetLineWidth(8);
         ofSetCircleResolution(128);
+
     }
 
     //mapping
@@ -33,7 +32,7 @@ void ofApp::setup() {
     renderFbo.allocate(PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y);
     warpedImg.allocate(PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y, OF_IMAGE_COLOR);
 
-    /*
+    
     // Draw the circular mask
     maskFbo.allocate(PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y);
     maskFbo.begin();
@@ -45,8 +44,41 @@ void ofApp::setup() {
 
     ofTexture& maskTexture = maskFbo.getTexture();
     renderFbo.getTexture().setAlphaMask(maskTexture);
+    
+
+    adjustMapping.set("Adjust Mapping", false);
+    projectWarped.set("Project Warped", true);
+
+    topLeftX.set("Top Left X", 0, -1,2);
+    topLeftY.set("Top Left Y", 0, 0,1);
+    topRightX.set("Top Right X", 1, -1, 2);
+    topRightY.set("Top Right Y", 0, 0, 1);
+    bottomLeftX.set("Bottom Left X", 0, -1, 2);
+    bottomLeftY.set("Bottom Left Y", 1, 0, 1);
+    bottomRightX.set("Bottom Right X", 1, -1, 2);
+    bottomRightY.set("Bottom Right Y", 1, 0, 1);
+
+    /*
+    cornersGroup.setName("Corners");
+    for (int i = 0; i < 4; i++) {
+        cornersGroup.add(corners[i]);
+    }
     */
 
+
+    guiPanel.setup("Homography", "settings.json");
+    guiPanel.add(adjustMapping);
+    guiPanel.add(projectWarped);
+    guiPanel.add(topLeftX);
+    guiPanel.add(topLeftY);
+    guiPanel.add(topRightX);
+    guiPanel.add(topRightY);
+    guiPanel.add(bottomLeftX);
+    guiPanel.add(bottomLeftY);
+    guiPanel.add(bottomRightX);
+    guiPanel.add(bottomRightY);
+
+    //guiPanel.add(cornersGroup);
 
 
     srcPoints.push_back(glm::vec2(0, 0));
@@ -54,20 +86,21 @@ void ofApp::setup() {
     srcPoints.push_back(glm::vec2(0, 1));
     srcPoints.push_back(glm::vec2(1, 1));
 
+    /*
     dstPoints.push_back(glm::vec2(0, 0));
     dstPoints.push_back(glm::vec2(1, 0));
     dstPoints.push_back(glm::vec2(0, 1));
     dstPoints.push_back(glm::vec2(1, 1));
+    */
+
+
+    dstPoints.push_back(glm::vec2(topLeftX,topLeftY));
+    dstPoints.push_back(glm::vec2(topRightX, topRightY));
+    dstPoints.push_back(glm::vec2(bottomLeftX, bottomLeftY));
+    dstPoints.push_back(glm::vec2(bottomRightX, bottomRightY));
 
     activePoint = -1;
     homographyReady = false;
-
-    adjustMapping.set("Adjust Mapping", false);
-    projectWarped.set("Project Warped", true);
-
-    guiPanel.setup("Homography", "settings.json");
-    guiPanel.add(adjustMapping);
-    guiPanel.add(projectWarped);
 
 }
 
@@ -84,7 +117,7 @@ void ofApp::update() {
 
         if (msg.getAddress() == "/position")
         {
-            posX = msg.getArgAsInt(0);
+            posX = PROJECTOR_RESOLUTION_X / 2 - circleDiameter / 2 + msg.getArgAsInt(0);
             posY = msg.getArgAsInt(1);
 
             circleVectors.push_back(Circles(posX, posY));
@@ -129,13 +162,10 @@ void ofApp::update() {
         {
             //play water
             ofEnableBlendMode(OF_BLENDMODE_DISABLED);
-            ofEnableAlphaBlending();
-            //ofSetColor(200, 200, 255, 10);
-            ofDisableAlphaBlending();
-            waterMovie.draw(0, 0, PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y);
 
-            //cirlces
-            ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+            //waterMovie.draw(0, 0, PROJECTOR_RESOLUTION_X, PROJECTOR_RESOLUTION_Y);
+            ofBackground(255);
+
 
             for (int i = 0; i < circleVectors.size(); i++) {
                 circleVectors[i].draw();
@@ -148,24 +178,21 @@ void ofApp::update() {
     {
         // Read the FBO to pixels.
         renderFbo.readToPixels(renderPixels);
+        maskFbo.readToPixels(maskPixels);
 
         // Warp the pixels into a new image.
         cv::Mat renderMat = ofxCv::toCv(renderPixels);
-
-        cv::Mat circularMask(renderMat.size(), renderMat.type());
-        cv::Point center(renderMat.cols / 2, renderMat.rows / 2);
-        const int radius = renderMat.rows / 2; // Circle radio
-        cv::circle(circularMask, center, radius, 255, cv::FILLED);// Draw a circle in the image center
+        cv::Mat maskMat = ofxCv::toCv(maskPixels);
 
         cv::Mat warpedMat(renderMat.size(), renderMat.type());
         warpedMat.setTo(0); // Clear data
-        renderMat.copyTo(warpedMat, circularMask); // Only values at mask > 0 will be copied.
+        renderMat.copyTo(warpedMat, maskMat); // Only values at mask > 0 will be copied.
+
 
 
 
         // Convert the result CV image back to OF space.
-        //ofxCv::toOf(warpedMat, warpedImg); 
-        //ofxCv::warpPerspective(renderPixels, warpedImg, homographyMat, CV_INTER_LINEAR);
+        ofxCv::toOf(warpedMat, warpedImg); 
         ofxCv::warpPerspective(warpedMat, warpedImg, homographyMat, CV_INTER_LINEAR);
 
         warpedImg.update();
@@ -246,8 +273,31 @@ void ofApp::mouseDragged(int x, int y, int button) {
         if (activePoint > -1)
         {
             // Move the active Point under the mouse, but stick to edges.
-            glm::vec2 normPt = glm::vec2(ofMap(x, mappingWidth, mappingWidth * 2, 0, 1, true), ofMap(y, 0, mappingHeight, 0, 1, true));
+            glm::vec2 normPt = glm::vec2(ofMap(x, mappingWidth, mappingWidth * 2, 0, 1, false), ofMap(y, 0, mappingHeight, 0, 1, true));
             dstPoints[activePoint] = normPt;
+            //corners[activePoint] = glm::vec2(x, y);
+
+            //pass value to gui
+            if (activePoint == 0)
+            {
+                topLeftX = normPt[0];
+                topLeftY = normPt[1];
+            }
+            else if (activePoint == 1)
+            {
+                topRightX = normPt[0];
+                topRightY = normPt[1];
+            }
+            else if (activePoint == 2)
+            {
+                bottomLeftX = normPt[0];
+                bottomLeftY = normPt[1];
+            }
+            else
+            {
+                bottomRightX = normPt[0];
+                bottomRightY = normPt[1];
+            }
         }
     }
 }
@@ -276,13 +326,6 @@ void ofApp::mousePressed(int x, int y, int button) {
     {
         //add ripple
 
-        //every click, make an instance with x, y positions and timer
-        //if instance exist, make circles
-        //if(objects[i]){ for loop circles }
-        //if timer is up, kill the instance
-
-        //if the x y is still the same after certain amount of time, make another array
-
         circleVectors.push_back(Circles(ofGetMouseX(), ofGetMouseY()));
     }
 
@@ -301,3 +344,5 @@ void ofApp::mouseReleased(int x, int y, int button) {
 
 
 // underwaterSunlight: https://www.youtube.com/watch?v=eog-W_udzvA&ab_channel=NATUREVIBE%E2%80%99S
+// peacefulWater: https://www.youtube.com/watch?v=_bxncSQvo_I&ab_channel=NumpXP
+//sky: https://www.youtube.com/watch?v=EQGFlVcio1Q&ab_channel=TrueGrowth
