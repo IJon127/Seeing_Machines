@@ -23,6 +23,8 @@ void ofApp::setup()
 	guiPanel.add(xLeft);
 	guiPanel.add(xRight);
 
+	guiPanel.loadFromFile("settings.json");
+
 	//setup window
 	ofSetWindowShape(circleDiameter, circleDiameter);
 

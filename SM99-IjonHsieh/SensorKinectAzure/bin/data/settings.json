@@ -3,9 +3,9 @@
         "Height_Change_Threshole": "38",
         "Position_Change_Threshole": "67",
         "Raising_Hand_Threshole": "176",
-        "X_Left_point": "1100",
-        "X_Right_point": "-1100",
-        "Z_back_point": "3500",
-        "Z_front_point": "1300"
+        "X_Left_point": "1061",
+        "X_Right_point": "-977",
+        "Z_back_point": "3330",
+        "Z_front_point": "1135"
     }
 }
