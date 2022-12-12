@@ -17,7 +17,7 @@ public:
     }
 
     void update() {
-        radius += 0.02;
+        radius += 0.1;
     }
 
     void draw() {
@@ -25,11 +25,12 @@ public:
             ofEnableAlphaBlending();
 
             float alpha = ofMap(radius * i, 1, 150, 40, 0);
-            float lineWeight = ofMap(radius * i, 1, 100, 1, 12);
+            float lineWeight = ofMap(radius * i, 1, 100, 1, 10);
             ofSetLineWidth(lineWeight);
             ofNoFill();
-            ofSetColor(180,220,255, alpha);
+            ofSetColor(255, alpha);
             ofDrawCircle(pos.x, pos.y, radius * i);
+
             ofDisableAlphaBlending();
         }
     }
@@ -82,10 +83,12 @@ private:
     ofPixels maskPixels;
 
 
+
     std::vector<glm::vec2> srcPoints;
     std::vector<glm::vec2> dstPoints;
 
     int activePoint;
+    int previewShiftY;
 
     cv::Mat homographyMat;
     bool homographyReady;
@@ -93,7 +96,7 @@ private:
     ofParameter<bool> adjustMapping;
     ofParameter<bool> projectWarped;
    
-    /* 
+    /*
     //can't be save in settings.json
     ofParameterGroup cornersGroup;
     ofParameter<glm::vec2> corners[4];
@@ -108,8 +111,13 @@ private:
     ofParameter<float> topRightY;
     ofParameter<float> bottomLeftY;
     ofParameter<float> bottomRightY;
+    
 
 
     ofxPanel guiPanel;
+
+    //sound
+    ofSoundPlayer* soundArray[6];
+    string soundNumber;
 
 };
